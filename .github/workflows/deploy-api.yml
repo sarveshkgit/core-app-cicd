@@ -59,5 +59,6 @@ jobs:
           protocol: ftps
           local-dir: ./publish/
           server-dir: /cicd/   #/site/wwwroot   # change only if your host uses a different folder
-          timeout: 60000
-          cleanup: true
+          security: strict
+          timeout: 120000       # big uploads need more timeout
+          log-level: verbose

@@ -1,0 +1,63 @@
+﻿name: Deploy .NET Core API to FTP
+
+on:
+  push:
+    branches:
+      - main
+      - "feature/**"
+    paths-ignore:
+      - ".github/workflows/*"
+      - "README.md"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 6.0.x     # Change to 6.0 / 7.0 if needed
+
+      - name: Restore Dependencies
+        run: dotnet restore
+
+      - name: Build Solution
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Publish API
+        run: dotnet publish ./NetCoreApp/WebApp/WebApp.csproj -c Release -o ./output/publish
+
+      - name: Upload Published Files as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: publish
+          path: ./output/publish
+
+
+  deploy:
+    runs-on: windows-latest
+    needs: build
+
+    steps:
+      - name: Download Published Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: publish
+          path: ./publish
+
+      - name: Deploy to FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps
+          local-dir: ./publish
+          server-dir: /site/wwwroot   # change only if your host uses a different folder
+          timeout: 60000
+          cleanup: true

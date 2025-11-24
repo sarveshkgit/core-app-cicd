@@ -58,6 +58,6 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           protocol: ftps
           local-dir: ./publish
-          server-dir: \cicd   #/site/wwwroot   # change only if your host uses a different folder
+          server-dir: /cicd   #/site/wwwroot   # change only if your host uses a different folder
           timeout: 60000
           cleanup: true
